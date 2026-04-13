@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1f2e">
+  <title>Croco Gift — Кейсы и Мини игры</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Верхняя панель -->
+  <div class="topbar">
+    <div class="user-info">
+      <span class="user-name" id="user-name">Загрузка...</span>
+      <span class="user-id" id="user-id">ID: ...</span>
+    </div>
+    <div class="balance-info" onclick="openStarsModal()">⭐️ <span id="balance">0</span></div>
+  </div>
+
+  <!-- ========== КЕЙСЫ ========== -->
+  <div class="container" id="cases-container">
+    <h1 style="text-align: center;">Открой кейс 🎁</h1>
+    <div id="cases-drag-container" class="cases-container"></div>
+  </div>
+
+  <!-- ========== МИНИ-ИГРЫ ========== -->
+  <div id="games-page" class="games-page" style="display: none;">
+    <h1 class="games-title">🎮 Мини игры</h1>
+    <div class="games-grid">
+
+      <div class="game-card" onclick="openGame('darts')">
+        <div class="game-icon">🎯</div>
+        <div class="game-info">
+          <div class="game-title">Дартс</div>
+          <div class="game-desc">Попади в яблочко! ×5 множитель</div>
+          <div class="min-bet">⭐️ Мин. ставка: 5</div>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="openGame('cups')">
+        <div class="game-icon">🥤</div>
+        <div class="game-info">
+          <div class="game-title">Стаканчики</div>
+          <div class="game-desc">Угадай, под каким стаканчиком звезда</div>
+          <div class="min-bet">⭐️ Мин. ставка: 5</div>
+        </div>
+      </div>
+
+      <div class="game-card" onclick="openGame('dice')">
+        <div class="game-icon">🎲</div>
+        <div class="game-info">
+          <div class="game-title">Кубик</div>
+          <div class="game-desc">Брось кубик и умножь ставку</div>
+          <div class="min-bet">⭐️ Мин. ставка: 5</div>
+        </div>
+      </div>
+
+      <div class="game-card crash-card" onclick="openGame('crash')">
+        <div class="crash-glow-bg"></div>
+        <div class="game-icon crash-icon">🚀</div>
+        <div class="game-info">
+          <div class="game-title crash-title">CRASH</div>
+          <div class="game-desc" style="color:#c0a0ff;">Лети до краша и забирай прибыль!</div>
+          <div class="min-bet" style="color:#f59e0b;">⭐️ Мин. ставка: 10 • Мультиплеер</div>
+        </div>
+      </div>
+
+    </div>
+    <button class="back-btn" onclick="showPage('cases', document.querySelectorAll('.nav-btn')[0])">← Назад</button>
+  </div>
+
+  <!-- ========== ПРОФИЛЬ ========== -->
+  <div id="profile-page" class="profile-page" style="display: none;">
+    <h2 class="profile-title">👤 Мои подарки</h2>
+    <div id="gifts-list" class="gifts-list"></div>
+    <button class="back-btn" onclick="showPage('cases', document.querySelectorAll('.nav-btn')[0])">← Назад</button>
+  </div>
+
+  <!-- ========== МОДАЛ: ДАРТС ========== -->
+  <div id="darts-modal" class="game-modal" style="display: none;">
+    <div class="game-modal-content">
+      <div class="game-modal-header">
+        <div class="game-modal-title">🎯 Дартс</div>
+        <button class="close-btn" onclick="closeGame('darts')">✕</button>
+      </div>
+      <div class="game-balance">
+        <span>Ваш баланс:</span>
+        <span class="balance-display">⭐️ <span id="darts-balance-display">0</span></span>
+      </div>
+      <div class="bet-section">
+        <div class="bet-label">Ваша ставка (⭐️)</div>
+        <div class="bet-control">
+          <button class="bet-adjust-btn" onclick="dartsBetAdjust(-5)">−5</button>
+          <input type="number" id="darts-bet" class="bet-input" min="5" value="5" step="1">
+          <button class="bet-adjust-btn" onclick="dartsBetAdjust(5)">+5</button>
+        </div>
+        <div class="min-bet-info">Минимальная ставка: 5 ⭐️</div>
+      </div>
+      <div class="darts-legend">
+        <div class="darts-legend-item"><div class="darts-legend-dot" style="background:#f0c040;box-shadow:0 0 8px #f0c040;"></div><span>Центр ×5</span></div>
+        <div class="darts-legend-item"><div class="darts-legend-dot" style="background:#ff6060;box-shadow:0 0 8px #ff6060;"></div><span>Красная ×3</span></div>
+        <div class="darts-legend-item"><div class="darts-legend-dot" style="background:#c080ff;box-shadow:0 0 8px #c080ff;"></div><span>Фиолет. ×1.5</span></div>
+        <div class="darts-legend-item"><div class="darts-legend-dot" style="background:#aaaaaa;box-shadow:0 0 8px #aaa;"></div><span>Внешняя ×1</span></div>
+        <div class="darts-legend-item"><div class="darts-legend-dot" style="background:#444;"></div><span>Мимо</span></div>
+      </div>
+      <div class="darts-canvas-wrap">
+        <canvas id="darts-canvas" width="300" height="300"></canvas>
+        <div id="darts-result-overlay"></div>
+      </div>
+      <div class="darts-stats">
+        <div class="darts-stat"><div class="darts-stat-label">Бросков</div><div class="darts-stat-value" id="darts-throws" style="color:#a0cfff;">0</div></div>
+        <div class="darts-stat"><div class="darts-stat-label">Выиграно</div><div class="darts-stat-value" id="darts-won" style="color:#f0c040;">0 ⭐️</div></div>
+        <div class="darts-stat"><div class="darts-stat-label">Последняя</div><div class="darts-stat-value" id="darts-last-zone" style="color:#aaa;">—</div></div>
+      </div>
+      <button class="play-btn" id="darts-play-btn" onclick="playDarts()">🎯 Бросить дротик</button>
+      <button class="back-btn" onclick="closeGame('darts')">← Закрыть</button>
+    </div>
+  </div>
+
+  <!-- ========== МОДАЛ: СТАКАНЧИКИ ========== -->
+  <div id="cups-modal" class="game-modal" style="display: none;">
+    <div class="game-modal-content">
+      <div class="game-modal-header">
+        <div class="game-modal-title">🥤 Стаканчики</div>
+        <button class="close-btn" onclick="closeGame('cups')">✕</button>
+      </div>
+      <div class="game-balance">
+        <span>Ваш баланс:</span>
+        <span class="balance-display">⭐️ <span id="cups-balance-display">0</span></span>
+      </div>
+      <div class="cups-section-label">Режим</div>
+      <div class="cups-mode-row">
+        <button class="cups-mode-btn active" data-mode="3" onclick="setCupsMode(3)">
+          <span class="cups-mode-icon">🥤🥤🥤</span>
+          <span class="cups-mode-name">×3</span>
+          <span class="cups-mode-desc">Быстро ×2 / Медл. ×3</span>
+        </button>
+        <button class="cups-mode-btn" data-mode="4" onclick="setCupsMode(4)">
+          <span class="cups-mode-icon">🥤🥤🥤🥤</span>
+          <span class="cups-mode-name">×4</span>
+          <span class="cups-mode-desc">Быстро ×3 / Медл. ×4</span>
+        </button>
+        <button class="cups-mode-btn" data-mode="6" onclick="setCupsMode(6)">
+          <span class="cups-mode-icon">🥤🥤🥤🥤🥤🥤</span>
+          <span class="cups-mode-name">×6</span>
+          <span class="cups-mode-desc">Быстро ×4 / Медл. ×5 (2⭐)</span>
+        </button>
+      </div>
+      <div class="cups-section-label">Скорость</div>
+      <div class="cups-speed-row">
+        <button class="cups-speed-btn active" data-speed="fast" onclick="setCupsSpeed('fast')">⚡ Быстро</button>
+        <button class="cups-speed-btn" data-speed="slow" onclick="setCupsSpeed('slow')">🐢 Медленно</button>
+      </div>
+      <div class="cups-section-label">
+        Скин стаканчика
+        <button class="cups-skins-toggle" onclick="cupsToggleSkins()">▼ Выбрать</button>
+      </div>
+      <div id="cups-skins-wrap" class="cups-skins-wrap" style="display:none;">
+        <div id="cups-skins-list" class="cups-skins-list"></div>
+      </div>
+      <div class="bet-section">
+        <div class="bet-label">Ваша ставка (⭐️) — множитель: <span id="cups-mult-display" style="color:#f0c040;font-weight:bold;">×3</span></div>
+        <div class="bet-control">
+          <button class="bet-adjust-btn" onclick="cupsBetAdjust(-5)">−5</button>
+          <input type="number" id="cups-bet" class="bet-input" min="5" value="5" step="1">
+          <button class="bet-adjust-btn" onclick="cupsBetAdjust(5)">+5</button>
+        </div>
+        <div class="min-bet-info">Минимальная ставка: 5 ⭐️</div>
+      </div>
+      <div id="cups-board" class="cups-board"></div>
+      <div id="cups-result-msg" class="cups-result-msg"></div>
+      <button class="play-btn" id="cups-play-btn" onclick="playCups()">🥤 Начать игру</button>
+      <button class="back-btn" onclick="closeGame('cups')">← Закрыть</button>
+    </div>
+  </div>
+
+  <!-- ========== МОДАЛ: КУБИК ========== -->
+  <div id="dice-modal" class="game-modal" style="display: none;">
+    <div class="game-modal-content">
+      <div class="game-modal-header">
+        <div class="game-modal-title">🎲 КУБИК</div>
+        <button class="close-btn" onclick="closeGame('dice')">✕</button>
+      </div>
+      <div class="game-balance">
+        <span>Ваш баланс:</span>
+        <span class="balance-display">⭐️ <span id="dice-balance-display">0</span></span>
+      </div>
+      <div class="bet-section">
+        <div class="bet-label">💰 СТАВКА (⭐️)</div>
+        <div class="bet-control">
+          <button class="bet-adjust-btn" onclick="diceBetAdjust(-5)">−5</button>
+          <input type="number" id="dice-bet" class="bet-input" min="5" value="5" step="1">
+          <button class="bet-adjust-btn" onclick="diceBetAdjust(5)">+5</button>
+        </div>
+        <div class="min-bet-info">Минимальная ставка: 5 ⭐️</div>
+      </div>
+      <div class="dice-tabs">
+        <button class="dice-tab active" id="dice-tab-1" onclick="setDiceMode('classic')">🎲 Один кубик</button>
+        <button class="dice-tab" id="dice-tab-2" onclick="setDiceMode('double')">🎲🎲 Два кубика</button>
+      </div>
+      <div id="dice-single-modes" class="dice-submodes">
+        <button class="dice-submode active" onclick="setDiceSubmode('classic','evenodd')">🔢 Чет/Нечет</button>
+        <button class="dice-submode" onclick="setDiceSubmode('classic','half')">⚖️ 1-3 / 4-6</button>
+        <button class="dice-submode" onclick="setDiceSubmode('classic','number')">🔢 Выбрать число</button>
+      </div>
+      <div id="dice-double-modes" class="dice-submodes" style="display:none;">
+        <button class="dice-submode active" onclick="setDiceSubmode('double','evenodd')">🔢 Чет/Нечет</button>
+        <button class="dice-submode" onclick="setDiceSubmode('double','half')">⚖️ 1-3 / 4-6</button>
+        <button class="dice-submode" onclick="setDiceSubmode('double','number')">🔢 Выбрать число</button>
+      </div>
+      <div id="dice-number-panel" class="dice-number-panel" style="display:none;">
+        <div class="dice-number-buttons" id="dice-number-buttons"></div>
+      </div>
+      <div class="dice-multiplier-display">
+        <span>💰 Множитель: </span>
+        <span id="dice-mult-value" class="dice-mult-value">×2</span>
+      </div>
+      <div class="dice-3d-container">
+        <div class="dice-3d" id="dice-3d">
+          <div class="dice-face dice-front">1</div>
+          <div class="dice-face dice-back">2</div>
+          <div class="dice-face dice-right">3</div>
+          <div class="dice-face dice-left">4</div>
+          <div class="dice-face dice-top">5</div>
+          <div class="dice-face dice-bottom">6</div>
+        </div>
+        <div class="dice-second" id="dice-second" style="display:none;">
+          <div class="dice-3d">
+            <div class="dice-face dice-front">1</div>
+            <div class="dice-face dice-back">2</div>
+            <div class="dice-face dice-right">3</div>
+            <div class="dice-face dice-left">4</div>
+            <div class="dice-face dice-top">5</div>
+            <div class="dice-face dice-bottom">6</div>
+          </div>
+        </div>
+      </div>
+      <div id="dice-result-display" class="dice-result-display"></div>
+      <button class="play-btn dice-play-btn" id="dice-play-btn" onclick="rollDice()">🎲 Бросить кубик</button>
+      <button class="back-btn" onclick="closeGame('dice')">← Закрыть</button>
+    </div>
+  </div>
+
+  <!-- ========== МОДАЛ: КРАШ ========== -->
+  <div id="crash-modal" class="game-modal crash-modal-full" style="display:none;padding:0;">
+    <div class="crash-wrapper">
+      <div class="crash-topbar">
+        <div class="crash-logo">🚀 CRASH</div>
+        <div class="crash-topbar-right">
+          <div class="crash-live-badge">LIVE</div>
+          <span class="crash-bal-badge">⭐️ <span id="crash-balance-display">0</span></span>
+          <button class="crash-close-btn" onclick="closeCrashModal()">✕</button>
+        </div>
+      </div>
+      <div id="crash-history" class="crash-history-bar"></div>
+      <div class="crash-arena" id="crash-arena">
+        <video id="crash-video-fly" muted playsinline loop>
+          <source src="videos/video2.webm" type="video/webm">
+        </video>
+        <video id="crash-video-crash" muted playsinline>
+          <source src="videos/video1.webm" type="video/webm">
+        </video>
+        <div id="crash-waiting-overlay" class="crash-overlay-center">
+          <div class="crash-wait-ring"></div>
+          <div class="crash-wait-label">Новый раунд через</div>
+          <div class="crash-wait-secs" id="crash-wait-secs">—</div>
+          <div class="crash-bets-open">✅ Ставки открыты</div>
+        </div>
+        <div id="crash-countdown-overlay" class="crash-overlay-center" style="display:none;background:rgba(0,0,0,0.75);">
+          <div id="crash-countdown-num" class="crash-countdown-num">3</div>
+          <div style="font-size:13px;color:#c0a0ff;margin-top:6px;">Ставки закрыты!</div>
+        </div>
+        <div id="crash-result-overlay" class="crash-overlay-center" style="display:none;background:rgba(0,0,0,0.85);">
+          <div class="crash-explosion">💥</div>
+          <div id="crash-result-mult" class="crash-result-mult">×1.00</div>
+          <div id="crash-result-msg" class="crash-result-msg"></div>
+        </div>
+        <div id="crash-fly-overlay" class="crash-fly-overlay" style="display:none;">
+          <div id="crash-multiplier" class="crash-mult-big">×1.00</div>
+          <div id="crash-status-text" class="crash-status-text">🚀 Летим!</div>
+        </div>
+      </div>
+      <div class="crash-bet-strip">
+        <button class="crash-adj-btn" onclick="crashBetAdjust(-10)">−</button>
+        <input type="number" id="crash-bet" value="50" min="10" class="crash-bet-input">
+        <button class="crash-adj-btn" onclick="crashBetAdjust(10)">+</button>
+        <button id="crash-action-btn" onclick="crashAction()" class="crash-action-btn">Поставить ⭐️</button>
+      </div>
+      <div class="crash-players-wrap">
+        <div class="crash-players-header">
+          <span>👥 Игроки раунда</span>
+          <span id="crash-players-count" class="crash-players-count">0</span>
+        </div>
+        <div id="crash-bets-list" class="crash-bets-list">
+          <div class="crash-no-bets">Пока нет ставок</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Навигация -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showPage('cases', this)"><span>🎁</span><span>Кейсы</span></button>
+    <button class="nav-btn" onclick="showPage('games', this)"><span>🎮</span><span>Мини игры</span></button>
+    <button class="nav-btn" onclick="showPage('profile', this)"><span>👤</span><span>Профиль</span></button>
+  </div>
+
+  <script src="script.js"></script>
+
+  <script>
+  // Принудительная инициализация Telegram
+  (function() {
+    function checkTelegram() {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.ready(); 
+        tg.expand();
+        
+        // Полноэкранный режим
+        if (tg.requestFullscreen) tg.requestFullscreen();
+        tg.setHeaderColor('#1a1f2e');
+        tg.setBackgroundColor('#0a0a1a');
+        
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+          document.getElementById('user-name').textContent = user.username ? '@' + user.username : user.first_name;
+          document.getElementById('user-id').textContent = 'ID: ' + user.id;
+        } else {
+          document.getElementById('user-name').textContent = 'Гость';
+          document.getElementById('user-id').textContent = 'ID: не определен';
+        }
+      } else {
+        document.getElementById('user-name').textContent = 'Гость';
+        document.getElementById('user-id').textContent = 'Telegram не найден';
+      }
+    }
+    checkTelegram();
+    setTimeout(checkTelegram, 500);
+  })();
+  </script>
+
+</body>
+</html>

@@ -153,7 +153,7 @@ function checkReferralParam() {
 
 async function notifyReferral(referrerId, newUserId) {
   try {
-    await fetch('https://fast-drop-production.up.railway.app/api/referral', {
+    await fetch('https://croco-gift-production.up.railway.app/api/referral', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ referrer_id: referrerId, new_user_id: newUserId })
@@ -1491,125 +1491,109 @@ function buyStars() {
 
 async function checkBalanceNow() {
   if (!currentUser) { alert('Нет пользователя'); return; }
-  showNotification(`💰 Ваш баланс: ${getBalance()} ⭐️`);
+  try {
+    const r = await fetch('https://croco-gift-production.up.railway.app/api/get_balance', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:currentUser.id}) });
+    const data = await r.json();
+    if (data.balance !== undefined) {
+      const local = getBalance();
+      if (data.balance > local) { setBalance(data.balance); showNotification(`✅ Синхронизировано! Баланс: ${data.balance} ⭐️`); }
+      else showNotification(`💰 Баланс: ${local} ⭐️`);
+    }
+  } catch(e) { showNotification('❌ Ошибка связи с сервером', false); }
 }
 
-const PROMO_CODES = { "CROCO1000": 1000, "CROCO5000": 5000 };
+const PROMO_CODES = { "STAR10000": 10000 };
 const VIP_IDS = [6227572453, 6794644473];
 
 function activatePromo() {
-  const input = document.getElementById('promo-input');
-  const result = document.getElementById('promo-result');
-  const code = input.value.trim().toUpperCase();
-  
-  if (!code) { result.textContent = '❌ Введите промокод!'; result.style.color = '#f87171'; return; }
-  
-  const reward = PROMO_CODES[code];
-  if (!reward) { result.textContent = '❌ Неверный промокод!'; result.style.color = '#f87171'; return; }
-  if (!currentUser) { result.textContent = '❌ Пользователь не найден'; result.style.color = '#f87171'; return; }
-  
-  const usedKey = 'promo_used_' + code + '_' + currentUser.id;
-  if (localStorage.getItem(usedKey)) { 
-    result.textContent = '❌ Уже использован!'; 
-    result.style.color = '#f87171'; 
-    return; 
+  const input=document.getElementById('promo-input'),result=document.getElementById('promo-result'),code=input.value.trim().toUpperCase();
+  if(!code){result.textContent='❌ Введите промокод!';result.style.color='#f87171';return;}
+  const reward=PROMO_CODES[code];
+  if(!reward){result.textContent='❌ Неверный промокод!';result.style.color='#f87171';return;}
+  if(!currentUser){result.textContent='❌ Пользователь не найден';result.style.color='#f87171';return;}
+  if(code==='STAR10000'){
+    if(!VIP_IDS.includes(Number(currentUser.id))){result.textContent='❌ Только для VIP!';result.style.color='#f87171';return;}
+    setBalance(getBalance()+reward);result.textContent=`✅ VIP бонус! +${reward} ⭐️`;result.style.color='#4ade80';return;
   }
-  
-  setBalance(getBalance() + reward);
-  localStorage.setItem(usedKey, 'true');
-  result.textContent = `✅ Получено +${reward} ⭐️`; 
-  result.style.color = '#4ade80';
-  showNotification(`🎉 Промокод активирован! +${reward} ⭐️`, true);
+  const usedKey='promo_used_'+code+'_'+currentUser.id;
+  if(localStorage.getItem(usedKey)){result.textContent='❌ Уже использован!';result.style.color='#f87171';return;}
+  setBalance(getBalance()+reward);localStorage.setItem(usedKey,'true');result.textContent=`✅ Получено +${reward} ⭐️`;result.style.color='#4ade80';
 }
 
 function payTON() {
-  const stars = parseInt(document.getElementById('ton-stars-input').value);
-  if (!stars || stars < 1) { alert('Введите количество звёзд!'); return; }
-  const ton = (stars / 90).toFixed(2);
-  const address = 'UQAzX8me42V164qefMy6GCp3TA8Q9pXT6Y8Jlh0R3-gcDqim';
-  
-  try {
-    Telegram.WebApp.openTelegramLink(`https://t.me/wallet?startattach=ton_transfer_${address}_${ton}`);
-  } catch {
-    window.open(`https://t.me/wallet?startattach=ton_transfer_${address}_${ton}`, '_blank');
-  }
+  const stars=parseInt(document.getElementById('ton-stars-input').value);
+  if(!stars||stars<1){alert('Введите количество звёзд!');return;}
+  const ton=(stars/90).toFixed(2),address='UQAzX8me42V164qefMy6GCp3TA8Q9pXT6Y8Jlh0R3-gcDqim';
+  try{Telegram.WebApp.openTelegramLink(`https://t.me/wallet?startattach=ton_transfer_${address}_${ton}`);}catch{window.open(`https://t.me/wallet?startattach=ton_transfer_${address}_${ton}`,'_blank');}
 }
 
-function showNotification(message, isSuccess = true) {
-  const ex = document.querySelector('.balance-notification');
-  if (ex) ex.remove();
-  
-  const n = document.createElement('div');
-  n.className = 'balance-notification';
-  n.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);background:${isSuccess ? 'linear-gradient(135deg,#4ade80,#22c55e)' : 'linear-gradient(135deg,#f87171,#ef4444)'};color:white;padding:12px 24px;border-radius:50px;font-weight:bold;box-shadow:0 0 30px ${isSuccess ? '#4ade80' : '#f87171'};z-index:10000;font-size:14px;border:1px solid gold;`;
-  n.textContent = message;
-  document.body.appendChild(n);
-  setTimeout(() => n.remove(), 3000);
+function showNotification(message, isSuccess=true) {
+  const ex=document.querySelector('.balance-notification');if(ex)ex.remove();
+  const n=document.createElement('div');n.className='balance-notification';
+  n.style.cssText=`position:fixed;top:20px;left:50%;transform:translateX(-50%);background:${isSuccess?'linear-gradient(135deg,#4ade80,#22c55e)':'linear-gradient(135deg,#f87171,#ef4444)'};color:white;padding:12px 24px;border-radius:50px;font-weight:bold;box-shadow:0 0 30px ${isSuccess?'#4ade80':'#f87171'};z-index:10000;font-size:14px;border:1px solid gold;`;
+  n.textContent=message;document.body.appendChild(n);setTimeout(()=>n.remove(),3000);
 }
 
 async function checkPendingPurchases() {
   if (!currentUser) return;
-  
   try {
-    const tg = window.Telegram.WebApp;
-    const startParam = tg?.initDataUnsafe?.start_param;
-    
-    if (startParam && startParam.startsWith('buy_')) {
-      const amount = parseInt(startParam.replace('buy_', ''));
-      if (!isNaN(amount) && amount > 0) {
-        setBalance(getBalance() + amount);
-        showNotification(`✅ +${amount} ⭐️ зачислено!`);
-        tg.initDataUnsafe.start_param = '';
-      }
+    const tg=window.Telegram.WebApp;
+    if(tg.initDataUnsafe?.start_param){
+      const param=tg.initDataUnsafe.start_param;
+      if(param.startsWith('buy_')){const amount=parseInt(param.replace('buy_',''));if(!isNaN(amount)&&amount>0){setBalance(getBalance()+amount);showNotification(`✅ +${amount} ⭐️ зачислено!`);tg.initDataUnsafe.start_param='';}}
     }
-    
-    const pk = 'pending_stars_' + currentUser.id;
-    const ps = localStorage.getItem(pk);
-    if (ps) {
-      const amount = parseInt(ps);
-      setBalance(getBalance() + amount);
-      localStorage.removeItem(pk);
-      showNotification(`✅ +${amount} ⭐️ зачислено!`);
-    }
-  } catch(e) {
-    console.log('Проверка покупок:', e);
-  }
+    const pk='pending_stars_'+currentUser.id,ps=localStorage.getItem(pk);
+    if(ps){const amount=parseInt(ps);setBalance(getBalance()+amount);localStorage.removeItem(pk);showNotification(`✅ +${amount} ⭐️ зачислено!`);}
+  } catch(e) {}
 }
 
-// Убираем синхронизацию с сервером (не нужна)
-function syncBalanceWithServer() {
-  // Баланс хранится только локально
-  console.log('💰 Баланс:', getBalance());
+async function syncBalanceWithServer() {
+  if (!currentUser) return;
+  try {
+    const r=await fetch('https://croco-gift-production.up.railway.app/api/get_balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:currentUser.id})});
+    const data=await r.json();
+    if(data.balance!==undefined){const local=getBalance(),srv=data.balance;if(srv>local)setBalance(srv);else if(local>srv)updateServerBalance(currentUser.id,local);}
+  } catch(e) {}
 }
 
 async function updateServerBalance(userId, balance) {
-  // Не используется
+  try {
+    await fetch('https://croco-gift-production.up.railway.app/api/update_balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:userId,balance})});
+  } catch(e) {}
 }
 
 const styleEl = document.createElement('style');
-styleEl.textContent = `
-  @keyframes slideDown {
-    from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-    to { transform: translateX(-50%) translateY(0); opacity: 1; }
-  }
-  @keyframes fadeOut {
-    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-  }
-`;
+styleEl.textContent=`@keyframes slideDown{from{transform:translateX(-50%) translateY(-100px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}@keyframes fadeOut{to{opacity:0;transform:translateX(-50%) translateY(-20px)}}`;
 document.head.appendChild(styleEl);
 
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(checkPendingPurchases, 1000);
+  setTimeout(syncBalanceWithServer, 2000);
 });
 
 let _sbTimer = null;
 const _origSB = window.setBalance;
 window.setBalance = function(value) {
   if (_origSB) _origSB(value);
-  // Синхронизация с сервером отключена
+  if (currentUser) {
+    clearTimeout(_sbTimer);
+    _sbTimer = setTimeout(() => updateServerBalance(currentUser.id, value), 1500);
+  }
 };
 
 const _origOG = window.openGame;
 window.openGame = function(game) {
+  syncBalanceWithServer();
   if (_origOG) _origOG(game);
 };
+
+
+
+
+
+
+
+
+
+
+

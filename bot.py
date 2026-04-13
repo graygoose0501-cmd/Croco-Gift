@@ -15,7 +15,7 @@ from aiogram.types import LabeledPrice, InlineKeyboardMarkup, InlineKeyboardButt
 BOT_TOKEN    = os.environ.get("BOT_TOKEN", "8658879063:AAE9X_jxKPe1pkPwJNm9kmmAaE_X15pW0Ik")
 OWNER_ID     = 6794644473
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-MINI_APP_URL = "https://t.me/CrocodileeGiftBot/httpsdrybush3b62prorpo849"
+MINI_APP_URL = "https://dry-bush-3b62.prorpo849.workers.dev/"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("crocogift")
